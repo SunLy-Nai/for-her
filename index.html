@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liquid Glass Name Form</title>
+<style>
+:root{
+  --bg:#03040a; --ink:#f4f6ff; --ink-soft:rgba(235,240,255,.68);
+  --glass:rgba(255,255,255,.07); --glass-edge:rgba(255,255,255,.42);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Inter","Helvetica Neue",Arial,sans-serif;overflow:hidden;position:relative}
+.scene{position:fixed;inset:0;z-index:0}
+.scene svg{width:100%;height:100%;display:block}
+.drift{animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(-3%,2%,0) scale(1.04)}}
+main{position:relative;z-index:1;min-height:100%;display:grid;place-items:center;padding:24px}
+
+/* Liquid glass card */
+.glass{
+  position:relative;width:min(380px,100%);padding:30px 26px 26px;border-radius:28px;
+  background:linear-gradient(140deg,rgba(255,255,255,.16),rgba(255,255,255,.03) 45%,rgba(120,150,255,.08));
+  -webkit-backdrop-filter:blur(18px) saturate(1.9) brightness(1.08);
+  backdrop-filter:url(#lens) blur(18px) saturate(1.9) brightness(1.08);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,.65),
+    inset 0 -1.5px 0 rgba(255,255,255,.18),
+    inset 1.5px 0 0 rgba(255,255,255,.22),
+    inset -1.5px 0 0 rgba(255,255,255,.12),
+    inset 0 0 40px rgba(170,190,255,.12),
+    0 30px 70px -10px rgba(0,0,0,.65),
+    0 0 0 .5px rgba(255,255,255,.1);
+}
+@supports not (backdrop-filter:url(#x)){
+  .glass{-webkit-backdrop-filter:blur(18px) saturate(1.9) brightness(1.08);backdrop-filter:blur(18px) saturate(1.9) brightness(1.08)}
+}
+.glass::before{ /* specular sheen */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:
+    radial-gradient(120% 60% at 15% -10%,rgba(255,255,255,.38),transparent 55%),
+    radial-gradient(80% 50% at 100% 110%,rgba(140,170,255,.22),transparent 60%);
+  mix-blend-mode:screen;
+}
+.glass > *{position:relative}
+h1{margin:0 0 6px;font-size:30px;font-weight:300;letter-spacing:-.02em;line-height:1.15;word-break:break-word}
+p{margin:0 0 22px;font-size:13px;color:var(--ink-soft)}
+
+.field{
+  display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -8px 16px rgba(0,0,0,.18);
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.field:focus-within{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 0 3px rgba(150,175,255,.28)}
+.field svg{flex:none;width:16px;height:16px;opacity:.8}
+.field input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--ink);font:inherit;font-size:14px}
+.field input::placeholder{color:rgba(235,240,255,.45)}
+
+button{
+  margin-top:16px;width:100%;height:46px;border:0;border-radius:14px;cursor:pointer;
+  font:inherit;font-size:14px;font-weight:600;color:#0b0d18;
+  background:linear-gradient(180deg,#fff,#dfe5ff);
+  box-shadow:inset 0 1px 0 #fff,0 10px 24px -8px rgba(160,185,255,.6);
+  transition:transform .15s,box-shadow .15s,opacity .2s;
+}
+button:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #fff,0 14px 28px -8px rgba(160,185,255,.8)}
+button:active{transform:scale(.98)}
+button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.step{display:none}.step.on{display:block;animation:in .4s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.row{display:grid;grid-template-columns:1fr 1.5fr;gap:10px}
+.field select{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;color:var(--ink);font:inherit;font-size:14px;appearance:none;-webkit-appearance:none;cursor:pointer}
+.field select:has(option[value=""]:checked){color:rgba(235,240,255,.55)}
+.field select option{background:#101326;color:#f4f6ff}
+button.ghost{margin-top:8px;height:40px;background:none;color:var(--ink);box-shadow:none;font-weight:500;opacity:.75}
+button.ghost:hover{box-shadow:none;opacity:1;transform:none}
+.party{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:24px;background:rgba(3,4,10,.3)}
+.party[hidden]{display:none}
+.party canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.party-card{text-align:center;animation:pop .7s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.cake{margin:0 0 6px}.cake svg{display:block;width:210px;max-width:70%;height:auto;margin:0 auto;overflow:visible}
+.layer,.candle,.flame{opacity:0;transform-box:fill-box}
+.layer,.candle,.flame{transform-origin:50% 100%}
+.build .layer{animation:drop .7s cubic-bezier(.3,1.4,.5,1) forwards}
+.build .l1{animation-delay:.1s}.build .l2{animation-delay:.7s}.build .l3{animation-delay:1.3s}
+.build .candle{animation:grow .4s ease-out forwards}
+.build .c1{animation-delay:2s}.build .c2{animation-delay:2.15s}.build .c3{animation-delay:2.3s}
+.build .flame{animation:light .5s ease-out 2.7s forwards,flick .35s ease-in-out 3.2s infinite alternate}
+.build .reveal{animation:in .6s ease 2.9s both}
+@keyframes drop{from{opacity:0;transform:translateY(-90px) scaleY(.7)}to{opacity:1;transform:none}}
+@keyframes grow{from{opacity:0;transform:scaleY(0)}to{opacity:1;transform:none}}
+@keyframes light{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@keyframes flick{from{transform:scale(1,1) rotate(-3deg)}to{transform:scale(.92,1.1) rotate(3deg)}}
+.count{display:none;font-size:84px;font-weight:200;line-height:1;margin:2px 0 8px;letter-spacing:-.03em}
+.wait .count{display:block}.wait .cake,.wait #again{display:none}
+@media (prefers-reduced-motion:reduce){.build .layer,.build .candle,.build .flame,.build .reveal{animation:none;opacity:1}}
+.party-card h1{font-size:34px;font-weight:300}
+@media (prefers-reduced-motion:reduce){.drift{animation:none}}
+</style>
+</head>
+<body>
+<div class="scene" aria-hidden="true">
+  <svg viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="c1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#0a1030"/><stop offset=".35" stop-color="#4f7bff"/>
+        <stop offset=".55" stop-color="#e8f0ff"/><stop offset=".8" stop-color="#2a2f7a"/><stop offset="1" stop-color="#05060f"/>
+      </linearGradient>
+      <linearGradient id="c2" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#05060f"/><stop offset=".3" stop-color="#9a8cff"/>
+        <stop offset=".5" stop-color="#ffffff"/><stop offset=".7" stop-color="#ffb36b"/><stop offset="1" stop-color="#0a0b1c"/>
+      </linearGradient>
+      <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <g class="drift">
+      <path d="M-60 420 C150 260 330 560 560 430 S900 250 1260 360 L1260 520 C960 420 820 640 560 580 S120 430 -60 560Z" fill="url(#c1)" filter="url(#soft)"/>
+      <path d="M-60 520 C200 420 380 700 640 560 S980 380 1260 470 L1260 560 C1000 500 860 720 620 690 S160 560 -60 640Z" fill="url(#c2)" opacity=".92" filter="url(#soft)"/>
+      <path d="M820 140 C960 60 1120 120 1260 60 L1260 300 C1130 240 960 330 820 260Z" fill="url(#c1)" opacity=".8" filter="url(#soft)"/>
+      <path d="M-60 180 C80 120 200 220 330 160 L330 250 C200 300 60 230 -60 290Z" fill="url(#c2)" opacity=".6" filter="url(#soft)"/>
+    </g>
+  </svg>
+</div>
+
+<!-- refraction lens for the glass edge (Chromium) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="lens" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".012 .018" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="38" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <section class="glass" id="card">
+    <form id="f" class="step on" novalidate>
+      <h1 id="hello">Hello!</h1>
+      <p>Tell us your name to get started.</p>
+      <label class="field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+        <input id="name" type="text" placeholder="Your name" autocomplete="given-name" aria-label="Your name" required>
+      </label>
+      <button type="submit" id="go" disabled>Continue</button>
+    </form>
+    <form id="f2" class="step" novalidate>
+      <h1 id="hello2">When’s your birthday?</h1>
+      <p>Pick the day and the month.</p>
+      <div class="row">
+        <label class="field"><select id="day" aria-label="Day"></select></label>
+        <label class="field"><select id="month" aria-label="Month"></select></label>
+      </div>
+      <button type="submit" id="go2" disabled>Celebrate</button>
+      <button type="button" class="ghost" id="back">Back</button>
+    </form>
+  </section>
+</main>
+<div id="party" class="party" hidden>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div id="pc" class="glass party-card" role="status">
+    <div class="cake"><svg viewBox="0 0 200 190" aria-hidden="true">
+<defs>
+<linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa6cc"/><stop offset="1" stop-color="#ff6fa8"/></linearGradient>
+<linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3d0"/><stop offset="1" stop-color="#ffd27d"/></linearGradient>
+<linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4bcff"/><stop offset="1" stop-color="#9a8cff"/></linearGradient>
+<radialGradient id="fl" cx=".5" cy=".7" r=".6"><stop offset="0" stop-color="#fff7c2"/><stop offset=".5" stop-color="#ffb347"/><stop offset="1" stop-color="#ff6a2b"/></radialGradient>
+</defs>
+<ellipse cx="100" cy="174" rx="88" ry="9" fill="rgba(255,255,255,.28)"/>
+<g class="layer l1"><rect x="28" y="124" width="144" height="48" rx="10" fill="url(#g1)"/><rect x="28" y="124" width="144" height="10" rx="5" fill="#fff" opacity=".92"/><circle cx="50" cy="138" r="6" fill="#fff" opacity=".92"/><circle cx="96" cy="140" r="7" fill="#fff" opacity=".92"/><circle cx="148" cy="137" r="6" fill="#fff" opacity=".92"/></g>
+<g class="layer l2"><rect x="46" y="88" width="108" height="40" rx="10" fill="url(#g2)"/><rect x="46" y="88" width="108" height="9" rx="4.5" fill="#fff" opacity=".92"/><circle cx="68" cy="101" r="5" fill="#fff" opacity=".92"/><circle cx="110" cy="103" r="6" fill="#fff" opacity=".92"/><circle cx="140" cy="100" r="5" fill="#fff" opacity=".92"/></g>
+<g class="layer l3"><rect x="64" y="56" width="72" height="36" rx="10" fill="url(#g3)"/><rect x="64" y="56" width="72" height="8" rx="4" fill="#fff" opacity=".92"/><circle cx="82" cy="68" r="5" fill="#fff" opacity=".92"/><circle cx="118" cy="67" r="5" fill="#fff" opacity=".92"/></g>
+<g class="candle c1"><rect x="80" y="32" width="6" height="25" rx="2" fill="#fff"/><path d="M80 40h6M80 48h6" stroke="#ff7eb6" stroke-width="3"/></g>
+<g class="candle c2"><rect x="97" y="32" width="6" height="25" rx="2" fill="#fff"/><path d="M97 40h6M97 48h6" stroke="#8affd0" stroke-width="3"/></g>
+<g class="candle c3"><rect x="114" y="32" width="6" height="25" rx="2" fill="#fff"/><path d="M114 40h6M114 48h6" stroke="#ffb36b" stroke-width="3"/></g>
+<g class="flame"><path d="M83 31c-5-5-3-10 0-16 3 6 5 11 0 16z" fill="url(#fl)"/></g>
+<g class="flame"><path d="M100 31c-5-5-3-10 0-16 3 6 5 11 0 16z" fill="url(#fl)"/></g>
+<g class="flame"><path d="M117 31c-5-5-3-10 0-16 3 6 5 11 0 16z" fill="url(#fl)"/></g>
+</svg></div>
+    <div class="count" id="count"></div>
+    <h1 id="ph" class="reveal">Happy Birthday!</h1>
+    <p id="psub" class="reveal"></p>
+    <button type="button" id="again">Celebrate again</button>
+    <button type="button" class="ghost" id="restart">Start over</button>
+  </div>
+</div>
+
+<script>
+const name=document.getElementById('name'),hello=document.getElementById('hello'),go=document.getElementById('go'),card=document.getElementById('card');
+name.addEventListener('input',()=>{
+  const v=name.value.trim();
+  hello.textContent=v?'Hello, '+v+'!':'Hello!';
+  go.disabled=!v;
+});
+const M=['January','February','March','April','May','June','July','August','September','October','November','December'],MX=[31,29,31,30,31,30,31,31,30,31,30,31];
+const f1=document.getElementById('f'),f2=document.getElementById('f2'),day=document.getElementById('day'),month=document.getElementById('month'),go2=document.getElementById('go2'),party=document.getElementById('party');
+day.innerHTML='<option value="">Day</option>'+Array.from({length:31},(_,i)=>`<option>${i+1}</option>`).join('');
+month.innerHTML='<option value="">Month</option>'+M.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+function step(el){[f1,f2].forEach(f=>f.classList.toggle('on',f===el));el.querySelector('input,select').focus({preventScroll:true})}
+function check(){const m=+month.value;[...day.options].forEach(o=>{o.disabled=!!(m&&+o.value>MX[m-1])});if(day.selectedOptions[0].disabled)day.value='';go2.disabled=!(day.value&&month.value)}
+day.addEventListener('change',check);month.addEventListener('change',check);
+f1.addEventListener('submit',e=>{e.preventDefault();const v=name.value.trim();if(!v)return;document.getElementById('hello2').textContent='When’s your birthday, '+v+'?';step(f2)});
+document.getElementById('back').addEventListener('click',()=>step(f1));
+
+/* confetti */
+const cv=document.getElementById('confetti'),cx=cv.getContext('2d'),cols=['#ffffff','#9fb4ff','#ffb36b','#ff7eb6','#8affd0','#c7a6ff'];let ps=[],raf=0;
+function burst(x,y,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=5+Math.random()*10;ps.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-7,w:6+Math.random()*6,h:3+Math.random()*4,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[i%cols.length],l:1})}if(!raf)raf=requestAnimationFrame(tick)}
+function tick(){const k=devicePixelRatio||1;cx.clearRect(0,0,cv.width,cv.height);ps=ps.filter(p=>p.y<innerHeight+30&&p.l>0);
+  ps.forEach(p=>{p.vy+=.22;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.l-=.0035;cx.save();cx.globalAlpha=Math.max(p.l,0);cx.translate(p.x*k,p.y*k);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.w/2*k,-p.h/2*k,p.w*k,p.h*k);cx.restore()});
+  raf=ps.length?requestAnimationFrame(tick):0}
+function fire(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;const k=devicePixelRatio||1,w=innerWidth,h=innerHeight;cv.width=w*k;cv.height=h*k;
+  burst(w*.2,h*.7,80);burst(w*.8,h*.7,80);setTimeout(()=>burst(w*.5,h*.45,110),350);setTimeout(()=>{burst(w*.3,h*.5,70);burst(w*.7,h*.5,70)},800)}
+
+f2.addEventListener('submit',e=>{
+  e.preventDefault();if(go2.disabled)return;
+  const n=name.value.trim(),d=+day.value,m=+month.value,now=new Date(),t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  let nx=new Date(now.getFullYear(),m-1,d);if(nx<t0)nx=new Date(now.getFullYear()+1,m-1,d);
+  const diff=Math.round((nx-t0)/864e5),pc=document.getElementById('pc'),$=id=>document.getElementById(id);
+  pc.classList.toggle('wait',diff!==0);party.hidden=false;
+  if(diff===0){$('ph').textContent='Happy Birthday, '+n+'!';$('psub').textContent='Make a wish and blow out the candles.';play()}
+  else{pc.classList.remove('build');$('count').textContent=diff;$('ph').textContent=diff===1?'day until your birthday':'days until your birthday';$('psub').textContent='See you on '+d+' '+M[m-1]+', '+n+'.'}
+});
+function play(){const pc=document.getElementById('pc');pc.classList.remove('build');void pc.offsetWidth;pc.classList.add('build');clearTimeout(play.t);play.t=setTimeout(fire,3000)}
+document.getElementById('again').addEventListener('click',play);
+document.getElementById('restart').addEventListener('click',()=>{party.hidden=true;name.value='';day.value='';month.value='';hello.textContent='Hello!';go.disabled=true;go2.disabled=true;step(f1)});
+</script>
+</body>
+</html>
